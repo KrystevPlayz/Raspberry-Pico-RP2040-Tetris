@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pico/stdlib.h"
-#include "pico/multicore.h"
 #include "hardware/i2c.h"
 #include "ssd1306.h"
 
@@ -238,6 +237,11 @@ int main() {
     gpio_set_dir(BUZZER_PIN, GPIO_OUT);
     gpio_put(BUZZER_PIN, 0);
 
+    // Initialize built-in LED as output, on while device is running
+    gpio_init(25);             // Initialize GPIO 25 (LED)
+    gpio_set_dir(25, GPIO_OUT); 
+    gpio_put(25, 1);           // Turn LED on (set HIGH)
+
     // Initialize OLED display
     ssd1306_init(&display, 128, 64, I2C_PORT, OLED_SDA, OLED_SCL);
 
@@ -259,8 +263,8 @@ int main() {
 
             bool moved = false;  // Track if piece moved this frame
 
-            // Simple input debounce of 150ms
-            if (absolute_time_diff_us(last_input_time, get_absolute_time()) > 150000) {
+            // Simple input debounce of 100ms
+            if (absolute_time_diff_us(last_input_time, get_absolute_time()) > 100000) {
                 // Move left if button pressed and no collision
                 if (!gpio_get(BTN_LEFT) && !check_collision_shape(block_x - 1, block_y, current_shape, current_rotation)) {
                     block_x--;
